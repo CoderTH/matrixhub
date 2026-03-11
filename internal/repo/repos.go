@@ -17,6 +17,7 @@ package repo
 import (
 	"gorm.io/gorm"
 
+	"github.com/matrixhub-ai/matrixhub/internal/domain/git"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/model"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/project"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/user"
@@ -33,7 +34,7 @@ type Repos struct {
 	User    user.IUserRepo
 	Model   model.IModelRepo
 	Label   model.ILabelRepo
-	Git     model.IGitRepo
+	Git     git.IGitRepo
 }
 
 func NewRepos(conf *config.Config) *Repos {

@@ -19,6 +19,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/matrixhub-ai/matrixhub/internal/domain/git"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/model"
 )
 
@@ -34,22 +35,22 @@ type IDatasetService interface {
 	ListDatasetTaskLabels(ctx context.Context) ([]*model.Label, error)
 
 	// Git operations
-	ListDatasetRevisions(ctx context.Context, project, name string) (*model.Revisions, error)
-	ListDatasetCommits(ctx context.Context, project, name, revision string, page, pageSize int) ([]*model.Commit, int64, error)
-	GetDatasetCommit(ctx context.Context, project, name, commitID string) (*model.Commit, error)
-	GetDatasetTree(ctx context.Context, project, name, revision, path string) ([]*model.TreeEntry, error)
-	GetDatasetBlob(ctx context.Context, project, name, revision, path string) (*model.TreeEntry, error)
+	ListDatasetRevisions(ctx context.Context, project, name string) (*git.Revisions, error)
+	ListDatasetCommits(ctx context.Context, project, name, revision string, page, pageSize int) ([]*git.Commit, int64, error)
+	GetDatasetCommit(ctx context.Context, project, name, commitID string) (*git.Commit, error)
+	GetDatasetTree(ctx context.Context, project, name, revision, path string) ([]*git.TreeEntry, error)
+	GetDatasetBlob(ctx context.Context, project, name, revision, path string) (*git.TreeEntry, error)
 }
 
 // DatasetService implements the dataset service operations.
 type DatasetService struct {
 	datasetRepo IDatasetRepo
 	labelRepo   model.ILabelRepo
-	gitRepo     model.IGitRepo
+	gitRepo     git.IGitRepo
 }
 
 // NewDatasetService creates a new DatasetService instance.
-func NewDatasetService(datasetRepo IDatasetRepo, labelRepo model.ILabelRepo, gitRepo model.IGitRepo) IDatasetService {
+func NewDatasetService(datasetRepo IDatasetRepo, labelRepo model.ILabelRepo, gitRepo git.IGitRepo) IDatasetService {
 	return &DatasetService{
 		datasetRepo: datasetRepo,
 		labelRepo:   labelRepo,
@@ -140,7 +141,7 @@ func (s *DatasetService) ListDatasetTaskLabels(ctx context.Context) ([]*model.La
 }
 
 // ListDatasetRevisions returns all branches and tags for a dataset.
-func (s *DatasetService) ListDatasetRevisions(ctx context.Context, project, name string) (*model.Revisions, error) {
+func (s *DatasetService) ListDatasetRevisions(ctx context.Context, project, name string) (*git.Revisions, error) {
 	if project == "" {
 		return nil, errors.New("invalid project")
 	}
@@ -152,7 +153,7 @@ func (s *DatasetService) ListDatasetRevisions(ctx context.Context, project, name
 }
 
 // ListDatasetCommits returns the commit history for a dataset.
-func (s *DatasetService) ListDatasetCommits(ctx context.Context, project, name, revision string, page, pageSize int) ([]*model.Commit, int64, error) {
+func (s *DatasetService) ListDatasetCommits(ctx context.Context, project, name, revision string, page, pageSize int) ([]*git.Commit, int64, error) {
 	if project == "" {
 		return nil, 0, errors.New("invalid project")
 	}
@@ -172,7 +173,7 @@ func (s *DatasetService) ListDatasetCommits(ctx context.Context, project, name, 
 }
 
 // GetDatasetCommit returns a specific commit by ID.
-func (s *DatasetService) GetDatasetCommit(ctx context.Context, project, name, commitID string) (*model.Commit, error) {
+func (s *DatasetService) GetDatasetCommit(ctx context.Context, project, name, commitID string) (*git.Commit, error) {
 	if project == "" {
 		return nil, errors.New("invalid project")
 	}
@@ -187,7 +188,7 @@ func (s *DatasetService) GetDatasetCommit(ctx context.Context, project, name, co
 }
 
 // GetDatasetTree returns the file tree at a specific revision and path.
-func (s *DatasetService) GetDatasetTree(ctx context.Context, project, name, revision, path string) ([]*model.TreeEntry, error) {
+func (s *DatasetService) GetDatasetTree(ctx context.Context, project, name, revision, path string) ([]*git.TreeEntry, error) {
 	if project == "" {
 		return nil, errors.New("invalid project")
 	}
@@ -199,7 +200,7 @@ func (s *DatasetService) GetDatasetTree(ctx context.Context, project, name, revi
 }
 
 // GetDatasetBlob returns the content of a file at a specific revision.
-func (s *DatasetService) GetDatasetBlob(ctx context.Context, project, name, revision, path string) (*model.TreeEntry, error) {
+func (s *DatasetService) GetDatasetBlob(ctx context.Context, project, name, revision, path string) (*git.TreeEntry, error) {
 	if project == "" {
 		return nil, errors.New("invalid project")
 	}

@@ -17,6 +17,7 @@ package syncjob
 import (
 	"context"
 
+	"github.com/matrixhub-ai/matrixhub/internal/domain/git"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/model"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/project"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/registry"
@@ -34,10 +35,10 @@ type SyncJobService struct {
 	registryRepo registry.IRegistryRepo
 	projectRepo  project.IProjectRepo
 	modelRepo    model.IModelRepo
-	gitRepo      model.IGitRepo
+	gitRepo      git.IGitRepo
 }
 
-func NewSyncJobService(srepo ISyncJobRepo, rrepo registry.IRegistryRepo, prepo project.IProjectRepo, mrepo model.IModelRepo, grepo model.IGitRepo) ISyncJobService {
+func NewSyncJobService(srepo ISyncJobRepo, rrepo registry.IRegistryRepo, prepo project.IProjectRepo, mrepo model.IModelRepo, grepo git.IGitRepo) ISyncJobService {
 	return &SyncJobService{
 		syncJobRepo:  srepo,
 		registryRepo: rrepo,
@@ -81,7 +82,7 @@ func (sjs *SyncJobService) ExecuteSyncJob(ctx context.Context, syncJob *SyncJob)
 			return err
 		}
 	}
-	gr := &model.GitRepository{
+	gr := &git.GitRepository{
 		RemoteRegistryURL:  reg.URL,
 		RemoteProjectName:  syncJob.ProjectName,
 		RemoteResourceName: syncJob.RemoteResourceName,

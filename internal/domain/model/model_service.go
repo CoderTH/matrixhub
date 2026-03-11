@@ -18,6 +18,8 @@ import (
 	"context"
 	"errors"
 	"strings"
+
+	"github.com/matrixhub-ai/matrixhub/internal/domain/git"
 )
 
 // IModelService defines the service interface for model operations.
@@ -33,22 +35,22 @@ type IModelService interface {
 	ListModelFrameLabels(ctx context.Context) ([]*Label, error)
 
 	// Git operations
-	ListModelRevisions(ctx context.Context, project, name string) (*Revisions, error)
-	ListModelCommits(ctx context.Context, project, name, revision string, page, pageSize int) ([]*Commit, int64, error)
-	GetModelCommit(ctx context.Context, project, name, commitID string) (*Commit, error)
-	GetModelTree(ctx context.Context, project, name, revision, path string) ([]*TreeEntry, error)
-	GetModelBlob(ctx context.Context, project, name, revision, path string) (*TreeEntry, error)
+	ListModelRevisions(ctx context.Context, project, name string) (*git.Revisions, error)
+	ListModelCommits(ctx context.Context, project, name, revision string, page, pageSize int) ([]*git.Commit, int64, error)
+	GetModelCommit(ctx context.Context, project, name, commitID string) (*git.Commit, error)
+	GetModelTree(ctx context.Context, project, name, revision, path string) ([]*git.TreeEntry, error)
+	GetModelBlob(ctx context.Context, project, name, revision, path string) (*git.TreeEntry, error)
 }
 
 // ModelService implements the model service operations.
 type ModelService struct {
 	modelRepo IModelRepo
 	labelRepo ILabelRepo
-	gitRepo   IGitRepo
+	gitRepo   git.IGitRepo
 }
 
 // NewModelService creates a new ModelService instance.
-func NewModelService(modelRepo IModelRepo, labelRepo ILabelRepo, gitRepo IGitRepo) IModelService {
+func NewModelService(modelRepo IModelRepo, labelRepo ILabelRepo, gitRepo git.IGitRepo) IModelService {
 	return &ModelService{
 		modelRepo: modelRepo,
 		labelRepo: labelRepo,
@@ -145,7 +147,7 @@ func (s *ModelService) ListModelFrameLabels(ctx context.Context) ([]*Label, erro
 }
 
 // ListModelRevisions returns all branches and tags for a model.
-func (s *ModelService) ListModelRevisions(ctx context.Context, project, name string) (*Revisions, error) {
+func (s *ModelService) ListModelRevisions(ctx context.Context, project, name string) (*git.Revisions, error) {
 	if project == "" {
 		return nil, errors.New("invalid project")
 	}
@@ -157,7 +159,7 @@ func (s *ModelService) ListModelRevisions(ctx context.Context, project, name str
 }
 
 // ListModelCommits returns the commit history for a model.
-func (s *ModelService) ListModelCommits(ctx context.Context, project, name, revision string, page, pageSize int) ([]*Commit, int64, error) {
+func (s *ModelService) ListModelCommits(ctx context.Context, project, name, revision string, page, pageSize int) ([]*git.Commit, int64, error) {
 	if project == "" {
 		return nil, 0, errors.New("invalid project")
 	}
@@ -178,7 +180,7 @@ func (s *ModelService) ListModelCommits(ctx context.Context, project, name, revi
 }
 
 // GetModelCommit returns a specific commit by ID.
-func (s *ModelService) GetModelCommit(ctx context.Context, project, name, commitID string) (*Commit, error) {
+func (s *ModelService) GetModelCommit(ctx context.Context, project, name, commitID string) (*git.Commit, error) {
 	if project == "" {
 		return nil, errors.New("invalid project")
 	}
@@ -193,7 +195,7 @@ func (s *ModelService) GetModelCommit(ctx context.Context, project, name, commit
 }
 
 // GetModelTree returns the file tree at a specific revision and path.
-func (s *ModelService) GetModelTree(ctx context.Context, project, name, revision, path string) ([]*TreeEntry, error) {
+func (s *ModelService) GetModelTree(ctx context.Context, project, name, revision, path string) ([]*git.TreeEntry, error) {
 	if project == "" {
 		return nil, errors.New("invalid project")
 	}
@@ -205,7 +207,7 @@ func (s *ModelService) GetModelTree(ctx context.Context, project, name, revision
 }
 
 // GetModelBlob returns the content of a file at a specific revision.
-func (s *ModelService) GetModelBlob(ctx context.Context, project, name, revision, path string) (*TreeEntry, error) {
+func (s *ModelService) GetModelBlob(ctx context.Context, project, name, revision, path string) (*git.TreeEntry, error) {
 	if project == "" {
 		return nil, errors.New("invalid project")
 	}

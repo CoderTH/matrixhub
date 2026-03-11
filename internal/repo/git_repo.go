@@ -17,14 +17,14 @@ package repo
 import (
 	"context"
 
-	"github.com/matrixhub-ai/matrixhub/internal/domain/model"
+	"github.com/matrixhub-ai/matrixhub/internal/domain/git"
 )
 
 type gitRepo struct {
 }
 
 // NewGitDB creates a new GitRepo instance
-func NewGitDB() model.IGitRepo {
+func NewGitDB() git.IGitRepo {
 	return &gitRepo{}
 }
 
@@ -41,37 +41,37 @@ func (g *gitRepo) DeleteRepository(ctx context.Context, project, name string) er
 }
 
 // ListRevisions returns all branches and tags for a model
-func (g *gitRepo) ListRevisions(ctx context.Context, project, name string) (*model.Revisions, error) {
-	return &model.Revisions{
-		Branches: []*model.Revision{},
-		Tags:     []*model.Revision{},
+func (g *gitRepo) ListRevisions(ctx context.Context, project, name string) (*git.Revisions, error) {
+	return &git.Revisions{
+		Branches: []*git.Revision{},
+		Tags:     []*git.Revision{},
 	}, nil
 }
 
 // ListCommits returns the commit history for a model
-func (g *gitRepo) ListCommits(ctx context.Context, project, name, revision string, page, pageSize int) ([]*model.Commit, int64, error) {
-	return []*model.Commit{}, 0, nil
+func (g *gitRepo) ListCommits(ctx context.Context, project, name, revision string, page, pageSize int) ([]*git.Commit, int64, error) {
+	return []*git.Commit{}, 0, nil
 }
 
 // GetCommit returns a specific commit by ID
-func (g *gitRepo) GetCommit(ctx context.Context, project, name, commitID string) (*model.Commit, error) {
-	return &model.Commit{}, nil
+func (g *gitRepo) GetCommit(ctx context.Context, project, name, commitID string) (*git.Commit, error) {
+	return &git.Commit{}, nil
 }
 
 // GetTree returns the file tree at a specific revision and path
-func (g *gitRepo) GetTree(ctx context.Context, project, name, revision, path string) ([]*model.TreeEntry, error) {
-	return []*model.TreeEntry{}, nil
+func (g *gitRepo) GetTree(ctx context.Context, project, name, revision, path string) ([]*git.TreeEntry, error) {
+	return []*git.TreeEntry{}, nil
 }
 
 // GetBlob returns the content of a file at a specific revision
-func (g *gitRepo) GetBlob(ctx context.Context, project, name, revision, path string) (*model.TreeEntry, error) {
-	return &model.TreeEntry{}, nil
+func (g *gitRepo) GetBlob(ctx context.Context, project, name, revision, path string) (*git.TreeEntry, error) {
+	return &git.TreeEntry{}, nil
 }
 
-func (g *gitRepo) Clone(ctx context.Context, gitRepository *model.GitRepository) error {
+func (g *gitRepo) Clone(ctx context.Context, gitRepository *git.GitRepository) error {
 	panic("not implemented")
 }
 
-func (g *gitRepo) Pull(ctx context.Context, gitRepository *model.GitRepository) error {
+func (g *gitRepo) Pull(ctx context.Context, gitRepository *git.GitRepository) error {
 	panic("not implemented")
 }
