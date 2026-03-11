@@ -3,15 +3,24 @@
 
 # List of usernames who may use /approve
 approvers:
-- wzshiming
-- samzong
-- yitingdc
-- lsq645599166
+  - wzshiming
+  - samzong
+  - yitingdc
+  - lsq645599166
 
 # List of usernames who may use /lgtm
 reviewers:
-- wzshiming
-- samzong
-- yitingdc
-- lsq645599166
-- yankay
+  - wzshiming
+  - samzong
+  - yitingdc
+  - lsq645599166
+  - yankay
+  - setsunakute
+  - scydas
+  - Phil-OSophy-42
+  - lemontrees123
+  - JaredTan95
+  - Frapschen
+  - fkajerry
+  - CoderTH
+  - shijinye
