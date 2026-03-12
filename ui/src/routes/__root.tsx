@@ -18,7 +18,7 @@ export const Route = createRootRoute({
   loader: async () => {
     // TODO: Add error handling
     // return await CurrentUser.GetCurrentUser({})
-    return {}
+    return { username: 'Admin' }
   },
   component: RootComponent,
   head: () => ({
