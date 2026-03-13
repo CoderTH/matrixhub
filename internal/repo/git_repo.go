@@ -18,7 +18,9 @@ import (
 	"context"
 	"fmt"
 	stdpath "path"
+	"strings"
 
+	"github.com/matrixhub-ai/hfd/pkg/mirror"
 	"github.com/matrixhub-ai/hfd/pkg/repository"
 	"github.com/matrixhub-ai/hfd/pkg/storage"
 
@@ -27,12 +29,14 @@ import (
 
 type gitRepo struct {
 	storage *storage.Storage
+	mirror  *mirror.Mirror
 }
 
 // NewGitDB creates a new GitRepo instance
-func NewGitDB(storage *storage.Storage) git.IGitRepo {
+func NewGitDB(storage *storage.Storage, mirror *mirror.Mirror) git.IGitRepo {
 	return &gitRepo{
 		storage: storage,
+		mirror:  mirror,
 	}
 }
 
@@ -359,9 +363,26 @@ func (g *gitRepo) GetBlob(ctx context.Context, project, name, revision, path str
 }
 
 func (g *gitRepo) Clone(ctx context.Context, gitRepository *git.GitRepository) error {
-	panic("not implemented")
+	gitPath := g.gitPath(gitRepository.ResourceType, gitRepository.ProjectName, gitRepository.ResourceName)
+	if repository.IsRepository(gitPath) {
+		return fmt.Errorf("repository already exists")
+	}
+
+	repoName := repoPrefix(gitRepository.ResourceType) + gitRepository.ProjectName + "/" + gitRepository.ResourceName
+	sourceURL := strings.TrimSuffix(gitRepository.RemoteRegistryURL, "/") + "/" + repoName
+	_, err := repository.InitMirror(ctx, gitPath, sourceURL)
+	if err != nil {
+		return err
+	}
+	return g.mirror.Sync(ctx, gitPath, repoName, mirror.WithSyncMirrorSourceURL(sourceURL))
 }
 
 func (g *gitRepo) Pull(ctx context.Context, gitRepository *git.GitRepository) error {
-	panic("not implemented")
+	gitPath := g.gitPath(gitRepository.ResourceType, gitRepository.ProjectName, gitRepository.ResourceName)
+	if !repository.IsRepository(gitPath) {
+		return fmt.Errorf("repository does not exist")
+	}
+	repoName := repoPrefix(gitRepository.ResourceType) + gitRepository.ProjectName + "/" + gitRepository.ResourceName
+	sourceURL := strings.TrimSuffix(gitRepository.RemoteRegistryURL, "/") + "/" + repoName
+	return g.mirror.Sync(ctx, gitPath, repoName, mirror.WithSyncMirrorSourceURL(sourceURL))
 }

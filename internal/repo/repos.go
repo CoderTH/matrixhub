@@ -15,6 +15,7 @@
 package repo
 
 import (
+	"github.com/matrixhub-ai/hfd/pkg/mirror"
 	gitstorage "github.com/matrixhub-ai/hfd/pkg/storage"
 	"gorm.io/gorm"
 
@@ -33,6 +34,7 @@ import (
 type Repos struct {
 	DB         *gorm.DB
 	GitStorage *gitstorage.Storage
+	GitMirror  *mirror.Mirror
 	Project    project.IProjectRepo
 	User       user.IUserRepo
 	Model      model.IModelRepo
@@ -41,25 +43,24 @@ type Repos struct {
 	Dataset    dataset.IDatasetRepo
 }
 
-func NewRepos(conf *config.Config) *Repos {
+func NewRepos(conf *config.Config, gitStorage *gitstorage.Storage, gitMirror *mirror.Mirror) *Repos {
 	log.Debug("init database")
 	database, err := db.New(conf.Database)
 	if err != nil {
 		log.Fatalw("create database failed", "error", err)
 	}
 
-	gitStorage := gitstorage.NewStorage(gitstorage.WithRootDir(conf.DataDir))
-
 	repos := &Repos{
 		DB:         database,
 		GitStorage: gitStorage,
+		GitMirror:  gitMirror,
 	}
 
 	repos.Project = NewProjectDBRepo(repos.DB)
 	repos.User = NewUserRepo(repos.DB)
 	repos.Model = NewModelDB(repos.DB)
 	repos.Label = NewLabelDB(repos.DB)
-	repos.Git = NewGitDB(repos.GitStorage)
+	repos.Git = NewGitDB(repos.GitStorage, repos.GitMirror)
 	repos.Dataset = NewDatasetDB(repos.DB)
 
 	return repos
