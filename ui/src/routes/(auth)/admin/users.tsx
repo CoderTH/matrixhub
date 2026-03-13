@@ -1,6 +1,8 @@
-import { Title } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+
+import AdminUsersIcon from '@/assets/svgs/admin-users-nav.svg?react'
+import { AdminPageLayout } from '@/feature/admin/components/admin-page-layout'
 
 export const Route = createFileRoute('/(auth)/admin/users')({
   component: RouteComponent,
@@ -10,8 +12,9 @@ function RouteComponent() {
   const { t } = useTranslation()
 
   return (
-    <div>
-      <Title order={3}>{t('admin.users')}</Title>
-    </div>
+    <AdminPageLayout
+      icon={AdminUsersIcon}
+      title={t('admin.users')}
+    />
   )
 }

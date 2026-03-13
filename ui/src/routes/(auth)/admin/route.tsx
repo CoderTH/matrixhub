@@ -1,6 +1,5 @@
 import {
-  Box,
-  Flex,
+  AppShell,
   Group,
   NavLink,
   ScrollArea,
@@ -13,7 +12,7 @@ import {
   Link,
   linkOptions,
   Outlet,
-  useRouterState,
+  useMatchRoute,
 } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
@@ -34,9 +33,6 @@ export const Route = createFileRoute('/(auth)/admin')({
 
 function AdminNavbar() {
   const { t } = useTranslation()
-  const activeRouteIds = useRouterState({
-    select: state => state.matches.map(match => match.routeId),
-  })
   const navRoutes = linkOptions([
     {
       id: AdminUsersRoute.id,
@@ -58,22 +54,31 @@ function AdminNavbar() {
     },
   ])
 
+  const matchRoute = useMatchRoute()
+
   return (
     <ScrollArea
       type="scroll"
       offsetScrollbars="y"
-      style={{ flex: 1 }}
+      style={{
+        flex: 1,
+        minHeight: 0,
+      }}
+      scrollbarSize={0}
     >
       <Stack gap={12} pb={20}>
         {navRoutes.map((route) => {
           const Icon = route.icon
-          const isActive = activeRouteIds.includes(route.id)
+          const isActive = !!matchRoute({
+            to: route.to,
+            fuzzy: true,
+          })
 
           return (
             <NavLink
               key={route.to}
               label={route.label}
-              leftSection={<Icon fontSize={16} />}
+              leftSection={<Icon fontSize={rem(16)} />}
               component={Link}
               to={route.to}
               active={isActive}
@@ -97,51 +102,53 @@ function AdminLayout() {
   const { t } = useTranslation()
 
   return (
-    <Flex
-      align="stretch"
-      gap={0}
-      h="100%"
+    <AppShell
+      mode="static"
+      navbar={{
+        width: 220,
+        breakpoint: '0em',
+      }}
     >
-      <Stack
+      <AppShell.Navbar
         component="nav"
-        gap={20}
-        w={220}
-        miw={220}
-        h="100%"
-        px={16}
-        style={{
-          borderInlineEnd: '1px solid var(--mantine-color-default-border)',
-        }}
+        mih={0}
+        my="lg"
+        px="md"
+        h="calc(100% - var(--mantine-spacing-lg) * 2)"
       >
         {/* FIXME: color: Gray80 */}
         <Group
-          gap={6}
           h={30}
           wrap="nowrap"
           pl={4}
+          gap={6}
           c="gray.7"
+          mb="lg"
         >
           <SettingsIcon
-            width={30}
+            width={rem(30)}
+            height={rem(30)}
+            style={{ flexShrink: 0 }}
           />
           <Text
             size="md"
             fw={600}
             lh={rem(24)}
+            truncate
           >
             {t('nav.settings')}
           </Text>
         </Group>
 
         <AdminNavbar />
-      </Stack>
+      </AppShell.Navbar>
 
-      <Box
-        flex={1}
-        px="md"
+      <AppShell.Main
+        component="div"
+        miw={0}
       >
         <Outlet />
-      </Box>
-    </Flex>
+      </AppShell.Main>
+    </AppShell>
   )
 }
