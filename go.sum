@@ -233,8 +233,8 @@ github.com/leonelquinteros/gotext v1.5.0 h1:ODY7LzLpZWWSJdAHnzhreOr6cwLXTAmc914F
 github.com/leonelquinteros/gotext v1.5.0/go.mod h1:OCiUVHuhP9LGFBQ1oAmdtNCHJCiHiQA8lf4nAifHkr0=
 github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
 github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
-github.com/matrixhub-ai/hfd v0.0.0-20260312094015-31ba83a04d46 h1:eU+LrHXonwwb/ljdUCnfg9e8vMAykk2EWi8rRjy1yVo=
-github.com/matrixhub-ai/hfd v0.0.0-20260312094015-31ba83a04d46/go.mod h1:sCOTuRQsc8c3tR+wO1MQWzPR2o5O9gNT2J8R+vE+h3c=
+github.com/matrixhub-ai/hfd v0.0.0-20260313080511-1e4f46786585 h1:izCbTshVYQiOQeTX5nznqHlGJ5+WVRdZmS6I+ftigB4=
+github.com/matrixhub-ai/hfd v0.0.0-20260313080511-1e4f46786585/go.mod h1:sCOTuRQsc8c3tR+wO1MQWzPR2o5O9gNT2J8R+vE+h3c=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-sqlite3 v1.14.33 h1:A5blZ5ulQo2AtayQ9/limgHEkFreKj1Dv226a1K73s0=

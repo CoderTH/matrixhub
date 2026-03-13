@@ -34,7 +34,7 @@ import (
 	"github.com/matrixhub-ai/hfd/pkg/mirror"
 	"github.com/matrixhub-ai/hfd/pkg/permission"
 	"github.com/matrixhub-ai/hfd/pkg/receive"
-	"github.com/matrixhub-ai/hfd/pkg/storage"
+	gitstorage "github.com/matrixhub-ai/hfd/pkg/storage"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
 
@@ -58,6 +58,9 @@ type APIServer struct {
 	gatewayMux *runtime.ServeMux
 	grpcServer *grpc.Server
 	port       int
+
+	gitHooks   gitHooks
+	gitStorage gitStorage
 
 	repos    *repo.Repos
 	handlers []handler.IHandler
@@ -115,6 +118,9 @@ func NewAPIServer(config *config.Config) *APIServer {
 		port:       config.APIServer.Port,
 	}
 
+	server.initGitHooks()
+	server.initGitStorage()
+
 	server.initHandlersServicesRepos()
 
 	server.httpServer.Handler = server.initBackends(server.httpServer.Handler)
@@ -124,13 +130,15 @@ func NewAPIServer(config *config.Config) *APIServer {
 	return server
 }
 
-func (server *APIServer) initBackends(handler http.Handler) http.Handler {
-	storage := storage.NewStorage(
-		storage.WithRootDir(server.config.DataDir),
-	)
+type gitHooks struct {
+	permissionHookFunc  func(ctx context.Context, op permission.Operation, repoName string, opCtx permission.Context) (bool, error)
+	preReceiveHookFunc  func(ctx context.Context, repoName string, updates []receive.RefUpdate) (bool, error)
+	postReceiveHookFunc func(ctx context.Context, repoName string, updates []receive.RefUpdate) error
+	mirrorSourceFunc    func(ctx context.Context, repoName string) (string, bool, error)
+	mirrorRefFilterFunc func(ctx context.Context, repoName string, remoteRefs []string) ([]string, error)
+}
 
-	var lfsStorage = lfs.NewLocal(storage.LFSDir())
-
+func (server *APIServer) initGitHooks() {
 	permissionHookFunc := func(ctx context.Context, op permission.Operation, repoName string, opCtx permission.Context) (bool, error) {
 		// userInfo, _ := authenticate.GetUserInfo(ctx)
 		return true, nil // or return false, nil to deny, or return an error to indicate an error
@@ -146,20 +154,45 @@ func (server *APIServer) initBackends(handler http.Handler) http.Handler {
 		return nil
 	}
 
-	var sharedMirror *mirror.Mirror
+	mirrorSourceFunc := func(ctx context.Context, repoName string) (string, bool, error) {
+		// return baseURL + "/" + repoName, true, nil
+		return "", false, nil
+	}
+
+	mirrorRefFilterFunc := func(ctx context.Context, repoName string, remoteRefs []string) ([]string, error) {
+		return remoteRefs, nil
+	}
+
+	server.gitHooks.permissionHookFunc = permissionHookFunc
+	server.gitHooks.preReceiveHookFunc = preReceiveHookFunc
+	server.gitHooks.postReceiveHookFunc = postReceiveHookFunc
+	server.gitHooks.mirrorSourceFunc = mirrorSourceFunc
+	server.gitHooks.mirrorRefFilterFunc = mirrorRefFilterFunc
+}
+
+type gitStorage struct {
+	storage      *gitstorage.Storage
+	lfsStorage   lfs.Storage
+	sharedMirror *mirror.Mirror
+}
+
+func (server *APIServer) initGitStorage() {
+	storage := gitstorage.NewStorage(
+		gitstorage.WithRootDir(server.config.DataDir),
+	)
+
+	lfsStorage := lfs.NewLocal(storage.LFSDir())
 
 	lfsTeeCache := lfs.NewTeeCache(
 		lfsStorage,
 	)
 
-	mirrorSourceFunc := func(ctx context.Context, repoName string) (string, bool, error) {
-		// return baseURL + "/" + repoName, true, nil
-		return "", false, nil
-	}
-	mirrorRefFilterFunc := func(ctx context.Context, repoName string, remoteRefs []string) ([]string, error) {
-		return remoteRefs, nil
-	}
-	sharedMirror = mirror.NewMirror(
+	mirrorSourceFunc := server.gitHooks.mirrorSourceFunc
+	mirrorRefFilterFunc := server.gitHooks.mirrorRefFilterFunc
+	preReceiveHookFunc := server.gitHooks.preReceiveHookFunc
+	postReceiveHookFunc := server.gitHooks.postReceiveHookFunc
+
+	sharedMirror := mirror.NewMirror(
 		mirror.WithMirrorSourceFunc(mirrorSourceFunc),
 		mirror.WithMirrorRefFilterFunc(mirrorRefFilterFunc),
 		mirror.WithPreReceiveHookFunc(preReceiveHookFunc),
@@ -167,6 +200,19 @@ func (server *APIServer) initBackends(handler http.Handler) http.Handler {
 		mirror.WithLFSCache(lfsTeeCache),
 		mirror.WithTTL(time.Hour),
 	)
+
+	server.gitStorage.storage = storage
+	server.gitStorage.lfsStorage = lfsStorage
+	server.gitStorage.sharedMirror = sharedMirror
+}
+
+func (server *APIServer) initBackends(handler http.Handler) http.Handler {
+	storage := server.gitStorage.storage
+	lfsStorage := server.gitStorage.lfsStorage
+	sharedMirror := server.gitStorage.sharedMirror
+	permissionHookFunc := server.gitHooks.permissionHookFunc
+	preReceiveHookFunc := server.gitHooks.preReceiveHookFunc
+	postReceiveHookFunc := server.gitHooks.postReceiveHookFunc
 
 	handler = backendhf.NewHandler(
 		backendhf.WithStorage(storage),
@@ -203,7 +249,10 @@ func (server *APIServer) initBackends(handler http.Handler) http.Handler {
 
 func (server *APIServer) initHandlersServicesRepos() {
 	// init repos
-	repos := repo.NewRepos(server.config)
+	repos := repo.NewRepos(server.config,
+		server.gitStorage.storage,
+		server.gitStorage.sharedMirror,
+	)
 
 	modelService := model.NewModelService(
 		repos.Model,
