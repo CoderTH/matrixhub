@@ -23,9 +23,7 @@ import (
 
 // Revision represents a Git reference (branch or tag).
 type Revision struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"createdAt"`
+	Name string `json:"name"`
 }
 
 // Revisions contains branches and tags.

@@ -24,6 +24,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	modelv1alpha1 "github.com/matrixhub-ai/matrixhub/api/go/v1alpha1"
+	"github.com/matrixhub-ai/matrixhub/internal/domain/git"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/model"
 	"github.com/matrixhub-ai/matrixhub/internal/infra/log"
 )
@@ -82,6 +83,31 @@ func modelToProto(m *model.Model) *modelv1alpha1.Model {
 		ReadmeContent:  m.ReadmeContent,
 		Size:           formatSize(m.Size),
 		ParameterCount: formatParameterCount(m.ParameterCount),
+	}
+}
+
+// revisionToProto converts domain git.Revision to proto Revision
+func revisionToProto(r *git.Revision) *modelv1alpha1.Revision {
+	return &modelv1alpha1.Revision{
+		Name: r.Name,
+	}
+}
+
+// revisionsToProto converts domain git.Revisions to proto Revisions
+func revisionsToProto(revisions *git.Revisions) *modelv1alpha1.Revisions {
+	branches := make([]*modelv1alpha1.Revision, len(revisions.Branches))
+	for i, b := range revisions.Branches {
+		branches[i] = revisionToProto(b)
+	}
+
+	tags := make([]*modelv1alpha1.Revision, len(revisions.Tags))
+	for i, t := range revisions.Tags {
+		tags[i] = revisionToProto(t)
+	}
+
+	return &modelv1alpha1.Revisions{
+		Branches: branches,
+		Tags:     tags,
 	}
 }
 
@@ -234,7 +260,24 @@ func (mh *ModelHandler) DeleteModel(ctx context.Context, request *modelv1alpha1.
 }
 
 func (mh *ModelHandler) ListModelRevisions(ctx context.Context, request *modelv1alpha1.ListModelRevisionsRequest) (*modelv1alpha1.ListModelRevisionsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "Not implemented")
+	// Validate request
+	if err := request.ValidateAll(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	// Call service
+	revisions, err := mh.ms.ListModelRevisions(ctx, request.Project, request.Name)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "does not exist") {
+			return nil, status.Errorf(codes.NotFound, "model %s not found in project %s", request.Name, request.Project)
+		}
+		return nil, status.Errorf(codes.Internal, "failed to list revisions: %v", err)
+	}
+
+	// Convert to proto and return
+	return &modelv1alpha1.ListModelRevisionsResponse{
+		Items: revisionsToProto(revisions),
+	}, nil
 }
 
 func (mh *ModelHandler) ListModelCommits(ctx context.Context, request *modelv1alpha1.ListModelCommitsRequest) (*modelv1alpha1.ListModelCommitsResponse, error) {

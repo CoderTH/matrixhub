@@ -219,9 +219,7 @@ enum Category {
 }
 
 message Revision {
-  string id = 1;
-  string name = 2;
-  string created_at = 3;
+  string name = 1;
 }
 
 message Commit {
@@ -250,4 +248,5 @@ message Label {
   Category category = 3;
   string created_at = 4;
   string updated_at = 5;
+
 }

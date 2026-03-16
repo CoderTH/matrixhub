@@ -805,13 +805,7 @@
     "v1alpha1Revision": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string"
-        },
         "name": {
-          "type": "string"
-        },
-        "createdAt": {
           "type": "string"
         }
       }

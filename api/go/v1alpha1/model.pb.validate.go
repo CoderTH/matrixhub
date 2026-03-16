@@ -3164,11 +3164,7 @@ func (m *Revision) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Id
-
 	// no validation rules for Name
-
-	// no validation rules for CreatedAt
 
 	if len(errors) > 0 {
 		return RevisionMultiError(errors)

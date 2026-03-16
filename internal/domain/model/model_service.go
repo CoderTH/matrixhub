@@ -155,6 +155,12 @@ func (s *ModelService) ListModelRevisions(ctx context.Context, project, name str
 		return nil, errors.New("invalid input")
 	}
 
+	// Check if model exists in database first
+	_, err := s.modelRepo.GetByProjectAndName(ctx, project, name)
+	if err != nil {
+		return nil, err
+	}
+
 	return s.gitRepo.ListRevisions(ctx, project, name)
 }
 
