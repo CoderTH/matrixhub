@@ -45,6 +45,10 @@ interface CollectionLayoutProps extends CollectionToolbarProps {
   onPageChange: (page: number) => void
 }
 
+function hasContent(value: ReactNode) {
+  return value !== null && value !== undefined && value !== false && value !== ''
+}
+
 function DefaultToolbar({
   searchPlaceholder,
   searchValue,
@@ -54,11 +58,8 @@ function DefaultToolbar({
   onBatchDelete,
   toolbarExtra,
   loading,
-  t,
-}: CollectionToolbarProps & {
-  loading?: boolean
-  t: (key: string, opts?: Record<string, unknown>) => string
-}) {
+}: CollectionToolbarProps & { loading?: boolean }) {
+  const { t } = useTranslation()
   const placeholder = typeof searchPlaceholder === 'string'
     ? searchPlaceholder
     : t('shared.search')
@@ -124,6 +125,10 @@ export function CollectionLayout({
   toolbarExtra,
 }: CollectionLayoutProps) {
   const { t } = useTranslation()
+  const showBatchDelete = (selectedCount ?? 0) > 0 && !!onBatchDelete
+  const hasEmptyTitle = hasContent(emptyTitle)
+  const hasEmptyDescription = hasContent(emptyDescription)
+  const showEmptyState = !hasItems && !loading && (hasEmptyTitle || hasEmptyDescription)
 
   const totalPages = pagination?.pages
     ?? (
@@ -132,7 +137,7 @@ export function CollectionLayout({
         : 0
     )
 
-  const showToolbar = searchPlaceholder || onRefresh || onBatchDelete || toolbarExtra
+  const showToolbar = !!(searchPlaceholder || onRefresh || showBatchDelete || toolbarExtra)
   const defaultToolbar = showToolbar
     ? (
         <DefaultToolbar
@@ -144,7 +149,6 @@ export function CollectionLayout({
           onBatchDelete={onBatchDelete}
           toolbarExtra={toolbarExtra}
           loading={loading}
-          t={t}
         />
       )
     : null
@@ -154,18 +158,20 @@ export function CollectionLayout({
     : defaultToolbar
 
   return (
-    <Stack gap={0}>
+    <Stack gap={0} miw={0}>
       {toolbar}
 
       {children}
 
-      {!hasItems && !loading && emptyDescription && (
+      {showEmptyState && (
         <Center py="xl">
           <Stack align="center" gap="xs">
-            <Text fw={500}>{emptyTitle}</Text>
-            <Text size="sm" c="dimmed">
-              {emptyDescription}
-            </Text>
+            {hasEmptyTitle && <Text fw={500}>{emptyTitle}</Text>}
+            {hasEmptyDescription && (
+              <Text size="sm" c="dimmed">
+                {emptyDescription}
+              </Text>
+            )}
           </Stack>
         </Center>
       )}

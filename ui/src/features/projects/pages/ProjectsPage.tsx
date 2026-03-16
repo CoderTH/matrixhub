@@ -3,23 +3,69 @@ import {
   Group,
   Paper,
   Stack,
-  Text,
   Title,
 } from '@mantine/core'
-import { useDebouncedValue } from '@mantine/hooks'
-import { useState } from 'react'
+import { useDebouncedCallback } from '@mantine/hooks'
+import {
+  getRouteApi,
+  useRouter,
+  useRouterState,
+} from '@tanstack/react-router'
+import {
+  startTransition,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 
 import ProjectIcon from '@/assets/svgs/project.svg?react'
 
 import { ProjectsTable } from '../components/ProjectsTable'
-import { useProjects } from '../hooks/useProjects'
+
+import type { MRT_RowSelectionState } from 'mantine-react-table'
+
+const projectsRouteApi = getRouteApi('/(auth)/(app)/projects/')
 
 export function ProjectsPage() {
   const { t } = useTranslation()
-  const [query, setQuery] = useState('')
-  const [debouncedQuery] = useDebouncedValue(query, 300)
-  const [page, setPage] = useState(1)
+  const router = useRouter()
+  const navigate = projectsRouteApi.useNavigate()
+  const search = projectsRouteApi.useSearch()
+  const {
+    projects,
+    pagination,
+  } = projectsRouteApi.useLoaderData()
+  const loading = useRouterState({
+    select: state => state.isLoading,
+  })
+  const [query, setQuery] = useState(search.query)
+  const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({})
+
+  const updateSearchQuery = useDebouncedCallback((value: string) => {
+    const nextQuery = value.trim()
+
+    if (nextQuery === search.query) {
+      return
+    }
+
+    setRowSelection({})
+    startTransition(() => {
+      void navigate({
+        replace: true,
+        search: prev => ({
+          ...prev,
+          page: 1,
+          query: nextQuery,
+        }),
+      })
+    })
+  }, 300)
+
+  const handleSearchChange = useCallback((value: string) => {
+    setQuery(value)
+    updateSearchQuery(value)
+  }, [updateSearchQuery])
 
   const handleCreate = () => {
     // TODO: open create project modal
@@ -29,12 +75,38 @@ export function ProjectsPage() {
     // TODO: open delete project modal
   }
 
-  const {
-    projects, pagination, loading, refresh,
-  } = useProjects({
-    name: debouncedQuery || undefined,
-    page,
-  })
+  const selectedProjects = useMemo(
+    () => projects.filter(project => !!project.name && !!rowSelection[project.name]),
+    [projects, rowSelection],
+  )
+
+  const handleBatchDelete = () => {
+    if (selectedProjects.length === 0) {
+      return
+    }
+
+    // TODO: open batch delete project modal with selectedProjects
+  }
+
+  const handleRefresh = useCallback(() => {
+    setRowSelection({})
+    void router.invalidate({
+      filter: match => match.routeId === '/(auth)/(app)/projects/',
+      sync: true,
+    })
+  }, [router])
+
+  const handlePageChange = useCallback((page: number) => {
+    setRowSelection({})
+    startTransition(() => {
+      void navigate({
+        search: prev => ({
+          ...prev,
+          page,
+        }),
+      })
+    })
+  }, [navigate])
 
   return (
     <Stack gap="lg">
@@ -43,33 +115,23 @@ export function ProjectsPage() {
         <Title order={2}>{t('routes.projects.title')}</Title>
       </Group>
 
-      <Paper
-        withBorder
-        radius="lg"
-        p="xl"
-        shadow="xs"
-      >
+      <Paper>
         <Stack gap="lg">
-          <Text
-            c="dimmed"
-            size="sm"
-          >
-            {t('routes.projects.description')}
-          </Text>
 
           <ProjectsTable
             records={projects}
             pagination={pagination}
             loading={loading}
-            page={page}
+            page={search.page ?? 1}
             searchValue={query}
-            onSearchChange={(value) => {
-              setQuery(value)
-              setPage(1)
-            }}
-            onRefresh={refresh}
+            onSearchChange={handleSearchChange}
+            onRefresh={handleRefresh}
             onDelete={handleDelete}
-            onPageChange={nextPage => setPage(nextPage)}
+            onBatchDelete={handleBatchDelete}
+            rowSelection={rowSelection}
+            onRowSelectionChange={setRowSelection}
+            onPageChange={handlePageChange}
+            selectedCount={selectedProjects.length}
             toolbarExtra={(
               <Button onClick={handleCreate}>
                 {t('routes.projects.create')}

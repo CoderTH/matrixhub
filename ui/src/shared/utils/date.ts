@@ -24,7 +24,7 @@ function toMilliseconds(value: TimestampValue) {
     return undefined
   }
 
-  if (String(Math.trunc(dateNum)).length <= 10) {
+  if (String(Math.trunc(Math.abs(dateNum))).length <= 10) {
     return dateNum * 1000
   }
 

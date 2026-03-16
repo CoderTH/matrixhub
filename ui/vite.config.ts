@@ -10,9 +10,9 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const proxyTarget = env.VITE_API_PROXY_TARGET ?? 'http://127.0.0.1:30001'
 
   return {
+    base: env.VITE_UI_BASE_PATH ?? '/',
     resolve: {
       dedupe: [
         'react',
@@ -43,14 +43,7 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         '/api': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-        },
-        '/apis': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
+          target: env.VITE_APP_API_URL,
         },
       },
     },

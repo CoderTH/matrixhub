@@ -1,4 +1,5 @@
 import {
+  type BoxProps,
   type PaperProps,
   type TableProps,
 } from '@mantine/core'
@@ -136,10 +137,17 @@ export function DataTable<TData extends MRT_RowData>({
   const {
     initialState,
     mantinePaperProps,
+    mantineTableContainerProps,
     mantineTableProps,
     state: extraState,
     ...restTableOptions
   } = tableOptions ?? {}
+  const tableState = {
+    isLoading: loading,
+    showSkeletons: loading,
+    ...extraState,
+    ...(rowSelection !== undefined ? { rowSelection } : {}),
+  }
 
   return (
     <CollectionLayout
@@ -202,12 +210,7 @@ export function DataTable<TData extends MRT_RowData>({
           density: 'xs',
           ...initialState,
         }}
-        state={{
-          isLoading: loading,
-          showSkeletons: loading,
-          rowSelection: rowSelection ?? {},
-          ...extraState,
-        }}
+        state={tableState}
         mantinePaperProps={mergeTableOptionProps<TData, PaperProps>(
           {
             radius: 0,
@@ -218,6 +221,15 @@ export function DataTable<TData extends MRT_RowData>({
             },
           },
           mantinePaperProps,
+        )}
+        mantineTableContainerProps={mergeTableOptionProps<TData, BoxProps>(
+          {
+            style: {
+              maxWidth: '100%',
+              overflowX: 'auto',
+            },
+          },
+          mantineTableContainerProps,
         )}
         mantineTableProps={mergeTableOptionProps<TData, TableProps>(
           {
