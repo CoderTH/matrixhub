@@ -17,7 +17,10 @@ import { useTranslation } from 'react-i18next'
 
 import DownloadIcon from '@/assets/svgs/download.svg?react'
 import UploadIcon from '@/assets/svgs/upload-cloud.svg?react'
-import { DetailHeader } from '@/components/DetailHeader'
+import { ResourceDetailHeader } from '@/components/ResourceDetailHeader'
+
+import { Route as DatasetSettingsRoute } from './settings'
+import { Route as DatasetTreeRoute } from './tree/$ref/$'
 
 // TODO: Replace with real API data
 const MOCK_DATA: Dataset = {
@@ -100,7 +103,7 @@ function DatasetLayout() {
     {
       id: 'tree',
       label: t('dataset.detail.tree'),
-      to: '/projects/$projectId/datasets/$datasetId/tree/$ref/$',
+      to: DatasetTreeRoute.to,
       params: {
         projectId,
         datasetId,
@@ -112,7 +115,7 @@ function DatasetLayout() {
       ? [{
           id: 'settings',
           label: t('dataset.detail.setting'),
-          to: '/projects/$projectId/datasets/$datasetId/settings',
+          to: DatasetSettingsRoute.to,
           params: {
             projectId,
             datasetId,
@@ -128,9 +131,9 @@ function DatasetLayout() {
   }))?.id || 'desc'
 
   return (
-    <>
-      <Box mt={20}>
-        <DetailHeader
+    <Box py={20}>
+      <Box mb={24}>
+        <ResourceDetailHeader
           projectId={projectId}
           name={datasetId}
           size={dataset.size}
@@ -144,14 +147,14 @@ function DatasetLayout() {
           )}
         />
       </Box>
-      <Space h={20} />
 
       <Tabs value={activeTab}>
         <Tabs.List style={{ gap: 'var(--mantine-spacing-md)' }}>
           {
             tabRoutes.map(({
               id,
-              label, ...linkProps
+              label,
+              ...linkProps
             }) => (
               <Tabs.Tab
                 key={label}
@@ -162,7 +165,7 @@ function DatasetLayout() {
                 lh="xs"
                 px={12}
                 py={8}
-                c={id === activeTab ? 'var(--mantine-color-gray-7)' : 'var(--mantine-color-gray-6)'}
+                c={id === activeTab ? 'gray.9' : 'gray.6'}
                 {...linkProps}
               >
                 {label}
@@ -183,6 +186,6 @@ function DatasetLayout() {
             : <Outlet />
         }
       </div>
-    </>
+    </Box>
   )
 }

@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Space,
   Tabs,
 } from '@mantine/core'
 import { Category, type Model } from '@matrixhub/api-ts/v1alpha1/model.pb.ts'
@@ -12,7 +11,10 @@ import { useTranslation } from 'react-i18next'
 
 import DownloadIcon from '@/assets/svgs/download.svg?react'
 import UploadIcon from '@/assets/svgs/upload-cloud.svg?react'
-import { DetailHeader } from '@/components/DetailHeader'
+import { ResourceDetailHeader } from '@/components/ResourceDetailHeader'
+
+import { Route as ModelSettingsRoute } from './settings'
+import { Route as ModelTreeRoute } from './tree/$ref/$'
 
 // TODO: Replace with real API data
 const MOCK_DATA: Model = {
@@ -95,7 +97,7 @@ function ModelLayout() {
     {
       id: 'tree',
       label: t('model.detail.tree'),
-      to: '/projects/$projectId/models/$modelId/tree/$ref/$',
+      to: ModelTreeRoute.to,
       params: {
         projectId,
         modelId,
@@ -107,7 +109,7 @@ function ModelLayout() {
       ? [{
           id: 'settings',
           label: t('model.detail.setting'),
-          to: '/projects/$projectId/models/$modelId/settings',
+          to: ModelSettingsRoute.to,
           params: {
             projectId,
             modelId,
@@ -123,9 +125,9 @@ function ModelLayout() {
   }))?.id || 'desc'
 
   return (
-    <>
-      <Box mt={20}>
-        <DetailHeader
+    <Box py={20}>
+      <Box mb={24}>
+        <ResourceDetailHeader
           projectId={projectId}
           name={modelId}
           size={model.size}
@@ -139,13 +141,13 @@ function ModelLayout() {
           )}
         />
       </Box>
-      <Space h="1.5rem" />
       <Tabs value={activeTab}>
         <Tabs.List style={{ gap: 'var(--mantine-spacing-md)' }}>
           {
             tabRoutes.map(({
               id,
-              label, ...linkProps
+              label,
+              ...linkProps
             }) => (
               <Tabs.Tab
                 key={id}
@@ -156,7 +158,7 @@ function ModelLayout() {
                 lh="xs"
                 px="12px"
                 py="8px"
-                c={id === activeTab ? 'var(--mantine-color-gray-7)' : 'var(--mantine-color-gray-6)'}
+                c={id === activeTab ? 'gray.9' : 'gray.6'}
                 {...linkProps}
               >
                 {label}
@@ -177,6 +179,6 @@ function ModelLayout() {
             : <Outlet />
         }
       </Box>
-    </>
+    </Box>
   )
 }
