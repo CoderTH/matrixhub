@@ -71,10 +71,30 @@ func (g *gitRepo) CreateRepository(ctx context.Context, project, name string) er
 	if repository.IsRepository(gitPath) {
 		return fmt.Errorf("repository already exists at %s", gitPath)
 	}
-	_, err := repository.Init(ctx, gitPath, "main")
+
+	defaultBranch := "main"
+	repo, err := repository.Init(ctx, gitPath, defaultBranch)
 	if err != nil {
 		return err
 	}
+
+	// TODO(@scyda): use actual user info from context when available
+	user := "HuggingFace"
+	email := "hf@users.noreply.huggingface.co"
+
+	// Create initial commit with default .gitattributes
+	_, err = repo.CreateCommit(ctx, defaultBranch, "Initial commit", user, email, []repository.CommitOperation{
+		{
+			Type:    repository.CommitOperationAdd,
+			Path:    repository.GitattributesFileName,
+			Content: repository.GitattributesText,
+		},
+	}, "")
+	if err != nil {
+		_ = repo.Remove()
+		return err
+	}
+
 	return nil
 }
 
