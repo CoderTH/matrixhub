@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -291,18 +293,24 @@ func (server *APIServer) registerRoutersAndHandlers() {
 	// register routers
 	server.engine.Any("/api/v1alpha1/*any", gin.WrapF(server.gatewayMux.ServeHTTP))
 
-	// serve frontend static files
-	server.engine.Static("/assets", "/app/assets")
+	// serve ui static files if staticDir is configured
+	staticDir := server.config.UI.StaticDir
+	if staticDir != "" {
+		server.engine.Static("/assets", filepath.Join(staticDir, "assets"))
+	}
 
 	// SPA fallback - serve index.html for all non-API routes
 	server.engine.NoRoute(func(c *gin.Context) {
-		// If the request is for an API route that doesn't exist, return 404
-		if len(c.Request.URL.Path) >= 4 && c.Request.URL.Path[:4] == "/api" {
+		if strings.HasPrefix(c.Request.URL.Path, "/api") {
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			return
 		}
-		// For all other routes, serve index.html (SPA routing)
-		c.File("/app/index.html")
+		if staticDir != "" {
+			c.File(filepath.Join(staticDir, "index.html"))
+			return
+		}
+		// If staticDir is not configured, return 404 for non-API routes
+		c.JSON(http.StatusNotFound, gin.H{"error": "frontend not configured"})
 	})
 
 	options := &handler.ServerOptions{
