@@ -15,6 +15,9 @@ export enum FileType {
 export enum Category {
   TASK = "TASK",
   LIBRARY = "LIBRARY",
+  LICENSE = "LICENSE",
+  LANGUAGE = "LANGUAGE",
+  OTHER = "OTHER",
 }
 
 export type ListModelTaskLabelsRequest = {

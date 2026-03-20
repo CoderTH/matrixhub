@@ -74,6 +74,15 @@ type TreeEntry struct {
 	Commit *Commit  `json:"commit,omitempty"`
 }
 
+// RepoMetadataFiles holds raw metadata-related files loaded from a git repo.
+// File interpretation stays in the model domain; git only loads bytes.
+type RepoMetadataFiles struct {
+	ReadmeContent        []byte
+	ConfigJSON           []byte
+	SafetensorsIndexJSON []byte
+	Size                 int64
+}
+
 type GitRepository struct {
 	RemoteRegistryURL  string
 	RemoteProjectName  string
@@ -109,4 +118,8 @@ type IGitRepo interface {
 	Clone(ctx context.Context, gitRepository *GitRepository) error
 
 	Pull(ctx context.Context, gitRepository *GitRepository) error
+
+	// ExtractMetadata reads metadata-related raw files from a Git repository.
+	// repoType: "models" or "datasets"
+	ExtractMetadata(ctx context.Context, repoType, project, name string) (*RepoMetadataFiles, error)
 }

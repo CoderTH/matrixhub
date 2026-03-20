@@ -17,6 +17,7 @@ package repo
 import (
 	"context"
 	"fmt"
+	"io"
 	stdpath "path"
 	"strings"
 
@@ -405,4 +406,58 @@ func (g *gitRepo) Pull(ctx context.Context, gitRepository *git.GitRepository) er
 	repoName := repoPrefix(gitRepository.ResourceType) + gitRepository.ProjectName + "/" + gitRepository.ResourceName
 	sourceURL := strings.TrimSuffix(gitRepository.RemoteRegistryURL, "/") + "/" + repoName
 	return g.mirror.Sync(ctx, gitPath, repoName, mirror.WithSyncMirrorSourceURL(sourceURL))
+}
+
+// ExtractMetadata reads raw metadata-related files from a Git repository.
+func (g *gitRepo) ExtractMetadata(ctx context.Context, repoType, project, name string) (*git.RepoMetadataFiles, error) {
+	metadata := &git.RepoMetadataFiles{}
+
+	// Open Git repository
+	gitPath := g.gitPath(repoType, project, name)
+	repo, err := repository.Open(gitPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open git repo: %w", err)
+	}
+
+	rev := repo.DefaultBranch()
+
+	// Read README.md raw content
+	if blob, err := repo.Blob(rev, "README.md"); err == nil {
+		if rc, err := blob.NewReader(); err == nil {
+			content, err := io.ReadAll(rc)
+			_ = rc.Close()
+			if err == nil {
+				metadata.ReadmeContent = content
+			}
+		}
+	}
+
+	// Read config.json raw content
+	if blob, err := repo.Blob(rev, "config.json"); err == nil {
+		if rc, err := blob.NewReader(); err == nil {
+			content, err := io.ReadAll(rc)
+			_ = rc.Close()
+			if err == nil {
+				metadata.ConfigJSON = content
+			}
+		}
+	}
+
+	// Read model.safetensors.index.json raw content
+	if blob, err := repo.Blob(rev, "model.safetensors.index.json"); err == nil {
+		if rc, err := blob.NewReader(); err == nil {
+			content, err := io.ReadAll(rc)
+			_ = rc.Close()
+			if err == nil {
+				metadata.SafetensorsIndexJSON = content
+			}
+		}
+	}
+
+	// Compute repository size
+	if size, err := repo.DiskUsage(); err == nil {
+		metadata.Size = size
+	}
+
+	return metadata, nil
 }

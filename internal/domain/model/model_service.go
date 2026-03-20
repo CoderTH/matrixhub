@@ -17,6 +17,7 @@ package model
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/matrixhub-ai/matrixhub/internal/domain/git"
@@ -40,6 +41,9 @@ type IModelService interface {
 	GetModelCommit(ctx context.Context, project, name, commitID string) (*git.Commit, error)
 	GetModelTree(ctx context.Context, project, name, revision, path string) ([]*git.TreeEntry, error)
 	GetModelBlob(ctx context.Context, project, name, revision, path string) (*git.TreeEntry, error)
+
+	// Metadata sync
+	SyncMetadata(ctx context.Context, project, name string) error
 }
 
 // ModelService implements the model service operations.
@@ -246,4 +250,50 @@ func (s *ModelService) GetModelBlob(ctx context.Context, project, name, revision
 	}
 
 	return s.gitRepo.GetBlob(ctx, project, name, revision, path)
+}
+
+// SyncMetadata synchronizes Git repository metadata to the database.
+func (s *ModelService) SyncMetadata(ctx context.Context, project, name string) error {
+	m, err := s.modelRepo.GetByProjectAndName(ctx, project, name)
+	if err != nil {
+		return fmt.Errorf("model not found: %w", err)
+	}
+
+	files, err := s.gitRepo.ExtractMetadata(ctx, "models", project, name)
+	if err != nil {
+		return fmt.Errorf("failed to read metadata files: %w", err)
+	}
+
+	metadata, err := AnalyzeRepoMetadata(files)
+	if err != nil {
+		return fmt.Errorf("failed to analyze metadata: %w", err)
+	}
+
+	update := &MetadataUpdate{ReadmeContent: &metadata.ReadmeContent}
+	if metadata.Size > 0 {
+		update.Size = &metadata.Size
+	}
+	if metadata.ParameterCount > 0 {
+		update.ParameterCount = &metadata.ParameterCount
+	}
+	if err := s.modelRepo.UpdateMetadata(ctx, m.ID, update); err != nil {
+		return fmt.Errorf("failed to update model metadata: %w", err)
+	}
+
+	return s.updateModelLabels(ctx, m.ID, metadata.Tags)
+}
+
+// updateModelLabels replaces all labels for a model with classified tags.
+func (s *ModelService) updateModelLabels(ctx context.Context, modelID int64, tags []ClassifiedTag) error {
+	var labelIDs []int
+
+	for _, tag := range tags {
+		label, err := s.labelRepo.GetOrCreateByName(ctx, tag.Name, tag.Category, "model")
+		if err != nil {
+			return fmt.Errorf("failed to get/create label %s (category=%s): %w", tag.Name, tag.Category, err)
+		}
+		labelIDs = append(labelIDs, label.ID)
+	}
+
+	return s.labelRepo.UpdateModelLabels(ctx, modelID, labelIDs)
 }

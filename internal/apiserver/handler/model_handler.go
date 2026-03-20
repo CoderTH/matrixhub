@@ -50,6 +50,23 @@ func formatParameterCount(count int64) string {
 	return fmt.Sprintf("%d", count)
 }
 
+func labelCategoryToProto(category string) modelv1alpha1.Category {
+	switch category {
+	case "library":
+		return modelv1alpha1.Category_LIBRARY
+	case "license":
+		return modelv1alpha1.Category_LICENSE
+	case "language":
+		return modelv1alpha1.Category_LANGUAGE
+	case "other":
+		return modelv1alpha1.Category_OTHER
+	case "task":
+		return modelv1alpha1.Category_TASK
+	default:
+		return modelv1alpha1.Category_OTHER
+	}
+}
+
 // modelToProto converts domain Model to proto Model
 func modelToProto(m *model.Model) *modelv1alpha1.Model {
 	labels := make([]*modelv1alpha1.Label, len(m.Labels))
@@ -57,13 +74,9 @@ func modelToProto(m *model.Model) *modelv1alpha1.Model {
 		labels[i] = &modelv1alpha1.Label{
 			Id:        int32(l.ID),
 			Name:      l.Name,
-			Category:  modelv1alpha1.Category_TASK, // Default to TASK
+			Category:  labelCategoryToProto(l.Category),
 			CreatedAt: l.CreatedAt.Format(time.RFC3339),
 			UpdatedAt: l.UpdatedAt.Format(time.RFC3339),
-		}
-		// Map category string to proto enum
-		if l.Category == "library" {
-			labels[i].Category = modelv1alpha1.Category_LIBRARY
 		}
 	}
 
