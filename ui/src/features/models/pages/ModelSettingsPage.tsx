@@ -3,12 +3,11 @@ import {
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { Models } from '@matrixhub/api-ts/v1alpha1/model.pb.ts'
+import { IconAlertTriangle, IconTrash } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import DeleteIcon from '@/assets/svgs/delete.svg?react'
-import WarningIcon from '@/assets/svgs/warning.svg?react'
 import { Route as ModelsRoute } from '@/routes/(auth)/(app)/models'
 import { ModalWrapper } from '@/shared/components/ModalWrapper'
 
@@ -90,7 +89,7 @@ export function ModelSettingsPage({
         </Text>
 
         <Alert
-          icon={<WarningIcon />}
+          icon={<IconAlertTriangle size={20} />}
           variant="light"
           color="var(--mantine-color-yellow-6)"
         >
@@ -113,7 +112,7 @@ export function ModelSettingsPage({
 
         <Button
           disabled={inputValue !== fullName}
-          leftSection={<DeleteIcon />}
+          leftSection={<IconTrash size={16} />}
           color="var(--mantine-color-red-6)"
           onClick={handleDelete}
         >

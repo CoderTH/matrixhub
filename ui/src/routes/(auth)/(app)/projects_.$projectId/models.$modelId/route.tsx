@@ -4,13 +4,12 @@ import {
   Tabs,
 } from '@mantine/core'
 import { Models } from '@matrixhub/api-ts/v1alpha1/model.pb.ts'
+import { IconDownload, IconCloudUpload } from '@tabler/icons-react'
 import {
   Outlet, useMatchRoute, createFileRoute, linkOptions, Link,
 } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
-import DownloadIcon from '@/assets/svgs/download.svg?react'
-import UploadIcon from '@/assets/svgs/upload-cloud.svg?react'
 import { buildModelBadges, buildModelMetaItems } from '@/features/models/models.utils'
 import { ResourceDetailHeader } from '@/shared/components/ResourceDetailHeader'
 
@@ -88,8 +87,8 @@ function ModelDetailLayout() {
           metaItems={buildModelMetaItems(model, projectId)}
           actions={(
             <>
-              <Button size="xs" color="cyan" variant="light" leftSection={<UploadIcon fill="cyan" />}>{t('model.upload')}</Button>
-              <Button size="xs" color="cyan" variant="light" leftSection={<DownloadIcon fill="cyan" />}>{t('model.download')}</Button>
+              <Button size="xs" color="cyan" variant="light" leftSection={<IconCloudUpload size={16} />}>{t('model.upload')}</Button>
+              <Button size="xs" color="cyan" variant="light" leftSection={<IconDownload size={16} />}>{t('model.download')}</Button>
             </>
           )}
         />

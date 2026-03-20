@@ -6,11 +6,11 @@ import {
   Text,
   Tooltip,
 } from '@mantine/core'
+import { IconCopy } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { Fragment, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import CopyIcon from '@/assets/svgs/copy.svg?react'
 import { BaseBadge } from '@/shared/components/badges/BaseBadge'
 
 import type { ResourceBadge, ResourceMetaItem } from '@/shared/components/resource-card/BaseCard'
@@ -56,7 +56,7 @@ export function ResourceDetailHeader({
             }) => (
               <Tooltip label={copied ? t('common.copied') : t('common.copyName')} withArrow>
                 <ActionIcon variant="subtle" color="gray" onClick={copy} size={24}>
-                  <CopyIcon />
+                  <IconCopy size={15} />
                 </ActionIcon>
               </Tooltip>
             )}

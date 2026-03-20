@@ -12,7 +12,7 @@ interface LibraryBadgeProps extends Omit<BaseBadgeProps, 'icon' | 'label'> {
 const LIBRARY_ICON_ENTRIES = [
   {
     matcher: /pytorch/i,
-    icon: <PytorchIcon width={16} height={16} style={{ color: 'var(--mantine-color-gray-6)' }} />,
+    icon: <PytorchIcon width={16} height={16} style={{ color: 'gray.6' }} />,
   },
 ] as const
 

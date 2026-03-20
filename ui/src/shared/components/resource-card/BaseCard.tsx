@@ -4,10 +4,10 @@ import {
   Stack,
   Text,
 } from '@mantine/core'
+import { IconDots } from '@tabler/icons-react'
 import { Fragment } from 'react'
 
-import DotsIcon from '@/assets/svgs/dots.svg?react'
-import { BaseBadge } from '@/shared/components/badges/BaseBadge'
+import { BaseBadge } from '@/shared/components/badges/BaseBadge.tsx'
 
 import classes from './BaseCard.module.css'
 
@@ -100,9 +100,8 @@ export function BaseCard({
                   },
                 }}
               >
-                <DotsIcon
-                  width={12}
-                  height={3}
+                <IconDots
+                  size={12}
                   style={{ color: 'var(--mantine-color-gray-6)' }}
                 />
               </BaseBadge>

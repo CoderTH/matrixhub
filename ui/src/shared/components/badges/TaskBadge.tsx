@@ -1,4 +1,5 @@
-import PhotoUpIcon from '@/assets/svgs/photo-up.svg?react'
+import { IconPhotoUp } from '@tabler/icons-react'
+
 import { BaseBadge } from '@/shared/components/badges/BaseBadge'
 
 import type { ComponentProps, ReactNode } from 'react'
@@ -12,7 +13,7 @@ interface TaskBadgeProps extends Omit<BaseBadgeProps, 'icon' | 'label'> {
 const TASK_ICON_ENTRIES = [
   {
     matcher: /(image|vision|photo)/i,
-    icon: <PhotoUpIcon width={16} height={16} style={{ color: 'var(--mantine-color-blue-4)' }} />,
+    icon: <IconPhotoUp size={16} style={{ color: 'var(--mantine-color-blue-4)' }} />,
   },
 ] as const
 

@@ -1,4 +1,5 @@
-import BinaryTreeIcon from '@/assets/svgs/binary-tree.svg?react'
+import { IconBinaryTree } from '@tabler/icons-react'
+
 import { BaseBadge } from '@/shared/components/badges/BaseBadge'
 
 import type { ComponentProps } from 'react'
@@ -16,9 +17,8 @@ export function ParameterCountBadge({
   return (
     <BaseBadge
       icon={(
-        <BinaryTreeIcon
-          width={16}
-          height={16}
+        <IconBinaryTree
+          size={16}
           style={{ color: 'var(--mantine-color-violet-4)' }}
         />
       )}

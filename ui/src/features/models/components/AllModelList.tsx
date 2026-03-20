@@ -6,10 +6,10 @@ import {
   Stack,
   Text,
 } from '@mantine/core'
+import { IconClock } from '@tabler/icons-react'
 import { startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import ClockIcon from '@/assets/svgs/clock.svg?react'
 import { PAGE_SIZE } from '@/features/models/models.query'
 import { Route } from '@/routes/(auth)/(app)/models'
 import { Pagination } from '@/shared/components/Pagination'
@@ -46,7 +46,7 @@ export function AllModelList() {
     {
       value: 'updatedAt',
       label: t('projects.detail.modelsPage.sortFieldUpdatedAt'),
-      icon: <ClockIcon width={16} height={16} />,
+      icon: <IconClock size={16} />,
     },
   ]
 

@@ -7,10 +7,8 @@ import {
   Text,
 } from '@mantine/core'
 import {
-  IconBinaryTree as BinaryTreeIcon,
-  IconClock as ClockIcon,
-  IconCube as ModelIcon,
-  IconPhotoUp as PhotoUpIcon,
+  IconClock,
+  IconCube,
 } from '@tabler/icons-react'
 import {
   getRouteApi,
@@ -19,8 +17,6 @@ import {
 import { startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import ClockIcon from '@/assets/svgs/clock.svg?react'
-import ModelIcon from '@/assets/svgs/model.svg?react'
 import {
   PAGE_SIZE,
   useModels,
@@ -76,7 +72,7 @@ export function ProjectModelsPage() {
     {
       value: 'updatedAt',
       label: t('projects.detail.modelsPage.sortFieldUpdatedAt'),
-      icon: <ClockIcon size={16} />,
+      icon: <IconClock size={16} />,
     },
   ]
 
@@ -149,7 +145,7 @@ export function ProjectModelsPage() {
             h={32}
             px="md"
             radius={6}
-            leftSection={<ModelIcon width={16} height={16} />}
+            leftSection={<IconCube width={16} height={16} />}
             component={Link}
             to="/models/new"
           >

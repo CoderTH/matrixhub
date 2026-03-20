@@ -1,12 +1,11 @@
 import { TextInput, type TextInputProps } from '@mantine/core'
 import { useDebouncedCallback } from '@mantine/hooks'
+import { IconSearch } from '@tabler/icons-react'
 import {
   startTransition,
   useEffect,
   useState,
 } from 'react'
-
-import SearchIcon from '@/assets/svgs/search.svg?react'
 
 export interface SearchInputProps extends Omit<TextInputProps, 'value' | 'onChange'> {
   value?: string
@@ -65,9 +64,8 @@ export function SearchInput({
       value={inputValue}
       placeholder={placeholder}
       leftSection={(
-        <SearchIcon
-          width={16}
-          height={16}
+        <IconSearch
+          size={16}
           style={{ color: 'var(--mantine-color-gray-5)' }}
         />
       )}
