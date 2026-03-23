@@ -12,12 +12,14 @@ interface RouteListSearchState {
   query?: string
 }
 
-interface UseRouteListStateOptions<TSearch extends RouteListSearchState> {
+interface UseRouteListStateOptions<TSearch extends RouteListSearchState, TRecord> {
   search: TSearch
   navigate: (options: {
     replace?: boolean
     search: (prev: TSearch) => TSearch
   }) => unknown
+  records: readonly TRecord[]
+  getRecordId: (record: TRecord) => string
   refresh?: () => unknown
   defaultPage?: number
   normalizeQuery?: (value: string) => string | undefined
@@ -31,22 +33,31 @@ function defaultNormalizeQuery(value: string) {
   return nextQuery || undefined
 }
 
-export function useRouteListState<TSearch extends RouteListSearchState>({
+export function useRouteListState<TSearch extends RouteListSearchState, TRecord>({
   search,
   navigate,
+  records,
+  getRecordId,
   refresh,
   defaultPage = DEFAULT_PAGE,
   normalizeQuery = defaultNormalizeQuery,
-}: UseRouteListStateOptions<TSearch>) {
+}: UseRouteListStateOptions<TSearch, TRecord>) {
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({})
+
+  const currentRecordIds = useMemo(
+    () => new Set(records.map(record => getRecordId(record))),
+    [getRecordId, records],
+  )
 
   const clearRowSelection = useCallback(() => {
     setRowSelection({})
   }, [])
 
   const selectedRowIds = useMemo(
-    () => Object.keys(rowSelection).filter(rowId => !!rowSelection[rowId]),
-    [rowSelection],
+    () => Object.keys(rowSelection).filter(
+      rowId => !!rowSelection[rowId] && currentRecordIds.has(rowId),
+    ),
+    [currentRecordIds, rowSelection],
   )
 
   const selectedCount = selectedRowIds.length

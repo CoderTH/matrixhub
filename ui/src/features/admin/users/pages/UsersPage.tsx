@@ -1,16 +1,24 @@
 import { Button } from '@mantine/core'
 import { IconUserPlus } from '@tabler/icons-react'
 import {
+  useQueryClient,
+  useSuspenseQuery,
+} from '@tanstack/react-query'
+import {
   getRouteApi,
-  useRouter,
   useRouterState,
 } from '@tanstack/react-router'
-import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useRouteListState } from '@/shared/hooks/useRouteListState'
 
 import { UsersTable } from '../components/UsersTable'
+import {
+  adminUserKeys,
+  usersQueryOptions,
+} from '../users.query'
+import { DEFAULT_USERS_PAGE } from '../users.schema'
+import { getUserRowId } from '../users.utils'
 
 import type { User } from '@matrixhub/api-ts/v1alpha1/user.pb'
 
@@ -18,23 +26,25 @@ const usersRouteApi = getRouteApi('/(auth)/admin/users')
 
 export function UsersPage() {
   const { t } = useTranslation()
-  const router = useRouter()
+  const queryClient = useQueryClient()
   const navigate = usersRouteApi.useNavigate()
   const search = usersRouteApi.useSearch()
   const {
+    data,
+    isFetching,
+  } = useSuspenseQuery(usersQueryOptions(search))
+  const {
     users,
     pagination,
-  } = usersRouteApi.useLoaderData()
-  const loading = useRouterState({
+  } = data
+  const routeLoading = useRouterState({
     select: state => state.isLoading,
   })
+  const loading = routeLoading || isFetching
 
-  const refreshUsers = useCallback(() => {
-    void router.invalidate({
-      filter: match => match.routeId === '/(auth)/admin/users',
-      sync: true,
-    })
-  }, [router])
+  const refreshUsers = () => queryClient.invalidateQueries({
+    queryKey: adminUserKeys.lists(),
+  })
 
   const {
     rowSelection,
@@ -46,6 +56,8 @@ export function UsersPage() {
   } = useRouteListState({
     search,
     navigate,
+    records: users,
+    getRecordId: getUserRowId,
     refresh: refreshUsers,
   })
 
@@ -70,7 +82,7 @@ export function UsersPage() {
       records={users}
       pagination={pagination}
       loading={loading}
-      page={search.page ?? 1}
+      page={search.page ?? DEFAULT_USERS_PAGE}
       searchValue={search.query ?? ''}
       onSearchChange={handleSearchChange}
       onRefresh={handleRefresh}
@@ -86,7 +98,6 @@ export function UsersPage() {
           onClick={handleCreate}
           leftSection={<IconUserPlus size={16} />}
         >
-
           {t('routes.admin.users.toolbar.create')}
         </Button>
       )}

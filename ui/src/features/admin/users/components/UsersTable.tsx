@@ -11,6 +11,8 @@ import { useTranslation } from 'react-i18next'
 import { DataTable, type TableProps } from '@/shared/components/DataTable'
 import { formatDateTime } from '@/shared/utils/date'
 
+import { getUserRowId } from '../users.utils'
+
 import type { User } from '@matrixhub/api-ts/v1alpha1/user.pb'
 import type { MRT_ColumnDef } from 'mantine-react-table'
 
@@ -21,10 +23,6 @@ interface UsersTableMeta {
 }
 
 type UsersTableProps = TableProps<User>
-
-function getUserRowId(user: User) {
-  return String(user.id ?? user.username ?? user.email ?? '')
-}
 
 function UserAdminCell({ row }: UserCellProps) {
   const { t } = useTranslation()
