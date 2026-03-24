@@ -66,8 +66,9 @@ type APIServer struct {
 	gitHooks   gitHooks
 	gitStorage gitStorage
 
-	repos    *repo.Repos
-	handlers []handler.IHandler
+	repos        *repo.Repos
+	handlers     []handler.IHandler
+	modelService model.IModelService
 }
 
 func NewAPIServer(config *config.Config) *APIServer {
@@ -104,6 +105,8 @@ func NewAPIServer(config *config.Config) *APIServer {
 		port:       config.APIServer.Port,
 	}
 
+	server.initGitHooks()
+	server.initGitStorage()
 	server.initHandlersServicesRepos()
 
 	streamMiddleware := []grpc.StreamServerInterceptor{
@@ -126,8 +129,6 @@ func NewAPIServer(config *config.Config) *APIServer {
 	)
 	server.grpcServer = grpcServer
 
-	server.initGitHooks()
-	server.initGitStorage()
 	server.httpServer.Handler = server.initBackends(server.httpServer.Handler)
 	server.registerRoutersAndHandlers()
 
@@ -154,7 +155,38 @@ func (server *APIServer) initGitHooks() {
 	}
 
 	postReceiveHookFunc := func(ctx context.Context, repoName string, updates []receive.RefUpdate) error {
-		// userInfo, _ := authenticate.GetUserInfo(ctx)
+		// Detect repo type from repoName prefix
+		repoType := "models"
+		actualName := repoName
+
+		if strings.HasPrefix(repoName, "datasets/") {
+			repoType = "datasets"
+			actualName = strings.TrimPrefix(repoName, "datasets/")
+		} else if strings.HasPrefix(repoName, "spaces/") {
+			repoType = "spaces"
+			actualName = strings.TrimPrefix(repoName, "spaces/")
+		}
+
+		// Only handle models for now
+		if repoType != "models" {
+			return nil
+		}
+
+		parts := strings.SplitN(actualName, "/", 2)
+		if len(parts) != 2 {
+			log.Warnf("invalid repo name format: %s", repoName)
+			return nil
+		}
+
+		if server.modelService == nil {
+			log.Warnf("Model service not initialized, skipping metadata sync for %s", repoName)
+			return nil
+		}
+
+		if err := server.modelService.SyncMetadata(ctx, parts[0], parts[1]); err != nil {
+			log.Errorf("failed to sync metadata for %s/%s: %v", parts[0], parts[1], err)
+		}
+
 		return nil
 	}
 
@@ -284,6 +316,7 @@ func (server *APIServer) initHandlersServicesRepos() {
 
 	server.repos = repos
 	server.handlers = handlers
+	server.modelService = modelService
 }
 
 func (server *APIServer) registerRoutersAndHandlers() {

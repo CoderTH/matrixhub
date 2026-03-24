@@ -72,8 +72,11 @@ func (FileType) EnumDescriptor() ([]byte, []int) {
 type Category int32
 
 const (
-	Category_TASK    Category = 0
-	Category_LIBRARY Category = 1
+	Category_TASK     Category = 0
+	Category_LIBRARY  Category = 1
+	Category_LICENSE  Category = 2
+	Category_LANGUAGE Category = 3
+	Category_OTHER    Category = 4
 )
 
 // Enum value maps for Category.
@@ -81,10 +84,16 @@ var (
 	Category_name = map[int32]string{
 		0: "TASK",
 		1: "LIBRARY",
+		2: "LICENSE",
+		3: "LANGUAGE",
+		4: "OTHER",
 	}
 	Category_value = map[string]int32{
-		"TASK":    0,
-		"LIBRARY": 1,
+		"TASK":     0,
+		"LIBRARY":  1,
+		"LICENSE":  2,
+		"LANGUAGE": 3,
+		"OTHER":    4,
 	}
 )
 
@@ -1951,10 +1960,13 @@ const file_v1alpha1_model_proto_rawDesc = "" +
 	"updated_at\x18\x05 \x01(\tR\tupdatedAt*\x1d\n" +
 	"\bFileType\x12\a\n" +
 	"\x03DIR\x10\x00\x12\b\n" +
-	"\x04FILE\x10\x01*!\n" +
+	"\x04FILE\x10\x01*G\n" +
 	"\bCategory\x12\b\n" +
 	"\x04TASK\x10\x00\x12\v\n" +
-	"\aLIBRARY\x10\x012\xf7\f\n" +
+	"\aLIBRARY\x10\x01\x12\v\n" +
+	"\aLICENSE\x10\x02\x12\f\n" +
+	"\bLANGUAGE\x10\x03\x12\t\n" +
+	"\x05OTHER\x10\x042\xf7\f\n" +
 	"\x06Models\x12\xa0\x01\n" +
 	"\x13ListModelTaskLabels\x12..matrixhub.v1alpha1.ListModelTaskLabelsRequest\x1a/.matrixhub.v1alpha1.ListModelTaskLabelsResponse\"(\x82\xd3\xe4\x93\x02\"\x12 /api/v1alpha1/models/task-labels\x12\xa6\x01\n" +
 	"\x14ListModelFrameLabels\x12/.matrixhub.v1alpha1.ListModelFrameLabelsRequest\x1a0.matrixhub.v1alpha1.ListModelFrameLabelsResponse\"+\x82\xd3\xe4\x93\x02%\x12#/api/v1alpha1/models/library-labels\x12y\n" +

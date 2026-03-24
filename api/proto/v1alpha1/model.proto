@@ -217,6 +217,9 @@ enum FileType {
 enum Category {
   TASK = 0;
   LIBRARY = 1;
+  LICENSE = 2;
+  LANGUAGE = 3;
+  OTHER = 4;
 }
 
 message Revision {

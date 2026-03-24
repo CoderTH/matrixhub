@@ -502,7 +502,10 @@
       "type": "string",
       "enum": [
         "TASK",
-        "LIBRARY"
+        "LIBRARY",
+        "LICENSE",
+        "LANGUAGE",
+        "OTHER"
       ],
       "default": "TASK"
     },
