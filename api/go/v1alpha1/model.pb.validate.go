@@ -3174,11 +3174,11 @@ func (m *Commit) validate(all bool) error {
 
 	// no validation rules for CommitterEmail
 
+	// no validation rules for CommitterDate
+
 	// no validation rules for Diff
 
 	// no validation rules for CreatedAt
-
-	// no validation rules for UpdatedAt
 
 	if len(errors) > 0 {
 		return CommitMultiError(errors)

@@ -221,6 +221,8 @@ func (g *gitRepo) ListCommits(ctx context.Context, repoType, project, name, revi
 			AuthorDate:     c.Author().When(),
 			CommitterName:  c.Committer().Name(),
 			CommitterEmail: c.Committer().Email(),
+			CommitterDate:  c.Committer().When(),
+			CreatedAt:      c.Committer().When(),
 		})
 	}
 
@@ -261,6 +263,8 @@ func (g *gitRepo) GetCommit(ctx context.Context, repoType, project, name, commit
 		AuthorDate:     c.Author().When(),
 		CommitterName:  c.Committer().Name(),
 		CommitterEmail: c.Committer().Email(),
+		CommitterDate:  c.Committer().When(),
+		CreatedAt:      c.Committer().When(),
 	}, nil
 }
 

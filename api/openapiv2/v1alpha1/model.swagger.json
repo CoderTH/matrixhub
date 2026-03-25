@@ -566,13 +566,13 @@
         "committerEmail": {
           "type": "string"
         },
+        "committerDate": {
+          "type": "string"
+        },
         "diff": {
           "type": "string"
         },
         "createdAt": {
-          "type": "string"
-        },
-        "updatedAt": {
           "type": "string"
         }
       }

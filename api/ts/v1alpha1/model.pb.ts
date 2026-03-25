@@ -165,9 +165,9 @@ export type Commit = {
   authorDate?: string
   committerName?: string
   committerEmail?: string
+  committerDate?: string
   diff?: string
   createdAt?: string
-  updatedAt?: string
 }
 
 export type Label = {

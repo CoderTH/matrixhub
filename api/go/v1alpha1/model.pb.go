@@ -1521,9 +1521,9 @@ type Commit struct {
 	AuthorDate     string                 `protobuf:"bytes,5,opt,name=author_date,json=authorDate,proto3" json:"author_date,omitempty"`
 	CommitterName  string                 `protobuf:"bytes,6,opt,name=committer_name,json=committerName,proto3" json:"committer_name,omitempty"`
 	CommitterEmail string                 `protobuf:"bytes,7,opt,name=committer_email,json=committerEmail,proto3" json:"committer_email,omitempty"`
-	Diff           string                 `protobuf:"bytes,8,opt,name=diff,proto3" json:"diff,omitempty"`
-	CreatedAt      string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt      string                 `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CommitterDate  string                 `protobuf:"bytes,8,opt,name=committer_date,json=committerDate,proto3" json:"committer_date,omitempty"`
+	Diff           string                 `protobuf:"bytes,9,opt,name=diff,proto3" json:"diff,omitempty"`
+	CreatedAt      string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1607,6 +1607,13 @@ func (x *Commit) GetCommitterEmail() string {
 	return ""
 }
 
+func (x *Commit) GetCommitterDate() string {
+	if x != nil {
+		return x.CommitterDate
+	}
+	return ""
+}
+
 func (x *Commit) GetDiff() string {
 	if x != nil {
 		return x.Diff
@@ -1617,13 +1624,6 @@ func (x *Commit) GetDiff() string {
 func (x *Commit) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
-	}
-	return ""
-}
-
-func (x *Commit) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
 	}
 	return ""
 }
@@ -1805,7 +1805,7 @@ const file_v1alpha1_model_proto_rawDesc = "" +
 	"\assh_url\x18\x01 \x01(\tR\x06sshUrl\x12\x19\n" +
 	"\bhttp_url\x18\x02 \x01(\tR\ahttpUrl\"\x1e\n" +
 	"\bRevision\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"\xb9\x02\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"\xc1\x02\n" +
 	"\x06Commit\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1f\n" +
@@ -1815,13 +1815,12 @@ const file_v1alpha1_model_proto_rawDesc = "" +
 	"\vauthor_date\x18\x05 \x01(\tR\n" +
 	"authorDate\x12%\n" +
 	"\x0ecommitter_name\x18\x06 \x01(\tR\rcommitterName\x12'\n" +
-	"\x0fcommitter_email\x18\a \x01(\tR\x0ecommitterEmail\x12\x12\n" +
-	"\x04diff\x18\b \x01(\tR\x04diff\x12\x1d\n" +
+	"\x0fcommitter_email\x18\a \x01(\tR\x0ecommitterEmail\x12%\n" +
+	"\x0ecommitter_date\x18\b \x01(\tR\rcommitterDate\x12\x12\n" +
+	"\x04diff\x18\t \x01(\tR\x04diff\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\t \x01(\tR\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\n" +
-	" \x01(\tR\tupdatedAt\"\xa3\x01\n" +
+	"created_at\x18\n" +
+	" \x01(\tR\tcreatedAt\"\xa3\x01\n" +
 	"\x05Label\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x128\n" +

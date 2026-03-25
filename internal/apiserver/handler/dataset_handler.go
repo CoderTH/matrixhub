@@ -111,9 +111,9 @@ func datasetCommitToProto(c *git.Commit) *datasetv1alpha1.Commit {
 		AuthorDate:     c.AuthorDate.Format(time.RFC3339),
 		CommitterName:  c.CommitterName,
 		CommitterEmail: c.CommitterEmail,
+		CommitterDate:  c.CommitterDate.Format(time.RFC3339),
 		Diff:           c.Diff,
 		CreatedAt:      c.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:      c.UpdatedAt.Format(time.RFC3339),
 	}
 }
 
