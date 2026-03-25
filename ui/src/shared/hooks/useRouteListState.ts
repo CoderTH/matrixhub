@@ -1,7 +1,5 @@
 import {
   startTransition,
-  useCallback,
-  useMemo,
   useState,
 } from 'react'
 
@@ -44,26 +42,20 @@ export function useRouteListState<TSearch extends RouteListSearchState, TRecord>
 }: UseRouteListStateOptions<TSearch, TRecord>) {
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({})
 
-  const currentRecordIds = useMemo(
-    () => new Set(records.map(record => getRecordId(record))),
-    [getRecordId, records],
-  )
+  const currentRecordIds = new Set(records.map(record => getRecordId(record)))
 
-  const clearRowSelection = useCallback(() => {
+  const clearRowSelection = () => {
     setRowSelection({})
-  }, [])
+  }
 
-  const selectedRowIds = useMemo(
-    () => Object.keys(rowSelection).filter(
-      rowId => !!rowSelection[rowId] && currentRecordIds.has(rowId),
-    ),
-    [currentRecordIds, rowSelection],
+  const selectedRowIds = Object.keys(rowSelection).filter(
+    rowId => !!rowSelection[rowId] && currentRecordIds.has(rowId),
   )
 
   const selectedCount = selectedRowIds.length
   const currentQuery = normalizeQuery(search.query ?? '')
 
-  const onSearchChange = useCallback((value: string) => {
+  const onSearchChange = (value: string) => {
     const nextQuery = normalizeQuery(value)
 
     if (nextQuery === currentQuery) {
@@ -79,14 +71,14 @@ export function useRouteListState<TSearch extends RouteListSearchState, TRecord>
         query: nextQuery,
       }),
     })
-  }, [clearRowSelection, currentQuery, defaultPage, navigate, normalizeQuery])
+  }
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = () => {
     clearRowSelection()
     void refresh?.()
-  }, [clearRowSelection, refresh])
+  }
 
-  const onPageChange = useCallback((page: number) => {
+  const onPageChange = (page: number) => {
     if (page === (search.page ?? defaultPage)) {
       return
     }
@@ -100,7 +92,7 @@ export function useRouteListState<TSearch extends RouteListSearchState, TRecord>
         }),
       })
     })
-  }, [clearRowSelection, defaultPage, navigate, search.page])
+  }
 
   return {
     rowSelection,

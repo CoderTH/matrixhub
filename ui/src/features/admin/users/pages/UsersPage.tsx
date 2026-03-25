@@ -8,7 +8,6 @@ import {
   getRouteApi,
   useRouterState,
 } from '@tanstack/react-router'
-import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useRouteListState } from '@/shared/hooks/useRouteListState'
@@ -43,9 +42,9 @@ export function UsersPage() {
   })
   const loading = routeLoading || isFetching
 
-  const refreshUsers = useCallback(() => queryClient.invalidateQueries({
+  const refreshUsers = () => queryClient.invalidateQueries({
     queryKey: adminUserKeys.lists(),
-  }), [queryClient])
+  })
 
   const {
     rowSelection,
