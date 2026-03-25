@@ -1,7 +1,7 @@
-import { Projects } from '@matrixhub/api-ts/v1alpha1/project.pb'
 import {
-  type ListModelCommitsRequest, type GetModelTreeRequest,
+  type ListModelCommitsRequest, type GetModelTreeRequest, Models,
 } from '@matrixhub/api-ts/v1alpha1/model.pb'
+import { Projects } from '@matrixhub/api-ts/v1alpha1/project.pb'
 import {
   keepPreviousData,
   queryOptions,
