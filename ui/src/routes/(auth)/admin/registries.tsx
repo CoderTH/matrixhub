@@ -3,8 +3,19 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
 import { AdminPageLayout } from '@/features/admin/components/admin-page-layout'
+import { RegistriesPage } from '@/features/admin/registries/pages/RegistriesPage'
+import { registriesQueryOptions } from '@/features/admin/registries/registries.query'
+import { registriesSearchSchema } from '@/features/admin/registries/registries.schema'
 
 export const Route = createFileRoute('/(auth)/admin/registries')({
+  validateSearch: registriesSearchSchema,
+  loaderDeps: ({ search }) => ({ search }),
+  loader: async ({
+    context: { queryClient },
+    deps: { search },
+  }) => {
+    await queryClient.ensureQueryData(registriesQueryOptions(search))
+  },
   component: RouteComponent,
 })
 
@@ -17,6 +28,8 @@ function RouteComponent() {
     <AdminPageLayout
       icon={AdminRegistriesIcon}
       title={t('admin.registries')}
-    />
+    >
+      <RegistriesPage />
+    </AdminPageLayout>
   )
 }

@@ -1,0 +1,33 @@
+{
+  "title": "Registry Management",
+  "searchPlaceholder": "Search by registry name",
+  "toolbar": {
+    "create": "Create Registry"
+  },
+  "table": {
+    "name": "Registry",
+    "status": "Status",
+    "url": "URL",
+    "type": "Provider",
+    "insecure": "Verify Remote Cert",
+    "credential": "Credential",
+    "createdAt": "Created At",
+    "actions": "Actions",
+    "empty": "No registries found"
+  },
+  "status": {
+    "healthy": "Healthy",
+    "unhealthy": "Unhealthy"
+  },
+  "insecure": {
+    "verified": "Verified",
+    "unverified": "Unverified"
+  },
+  "credential": {
+    "basic": "basic"
+  },
+  "actions": {
+    "edit": "Edit",
+    "delete": "Delete"
+  }
+}
