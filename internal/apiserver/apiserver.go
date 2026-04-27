@@ -50,12 +50,16 @@ import (
 	"github.com/matrixhub-ai/matrixhub/internal/domain/authz"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/dataset"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/model"
+	"github.com/matrixhub-ai/matrixhub/internal/domain/registrydiscovery"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/syncjob"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/syncpolicy"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/user"
 	"github.com/matrixhub-ai/matrixhub/internal/infra/config"
 	"github.com/matrixhub-ai/matrixhub/internal/infra/log"
+	hfdiscovery "github.com/matrixhub-ai/matrixhub/internal/infra/registrydiscovery/hf"
 	"github.com/matrixhub-ai/matrixhub/internal/jobserver"
+	"github.com/matrixhub-ai/matrixhub/internal/jobserver/canceller"
+	"github.com/matrixhub-ai/matrixhub/internal/jobserver/logstore"
 	"github.com/matrixhub-ai/matrixhub/internal/repo"
 )
 
@@ -396,26 +400,41 @@ func (server *APIServer) initHandlersServicesRepos() {
 	)
 	userService := user.NewUserService(repos.Session, repos.User)
 
+	logDir := server.config.JobServer.LogDir
+	if logDir == "" {
+		logDir = filepath.Join(server.config.DataDir, "logs", "jobs")
+	}
+	logStore := logstore.NewFileLogStore(logDir)
+	canc := canceller.NewMemCanceller()
+
 	syncJobService := syncjob.NewSyncJobService(
 		repos.SyncJob,
 		repos.Registry,
 		repos.Project,
 		repos.Model,
 		repos.Git,
+		logStore,
 	)
 
 	// init sync policy service
-	jobGenerator := syncpolicy.NewSyncJobGenerator()
+	discoveries := map[string]registrydiscovery.Discovery{
+		registrydiscovery.ProviderHuggingFace: hfdiscovery.New(),
+	}
+	jobGenerator := syncpolicy.NewSyncJobGenerator(repos.Registry, discoveries)
 	syncPolicyService := syncpolicy.NewSyncPolicyService(
 		repos.SyncPolicy,
 		repos.SyncTask,
 		syncJobService,
+		repos.Project,
 		jobGenerator,
 	)
 
+	// wire task status reporter from sync policy service to sync job service
+	syncJobService.SetOnJobDone(syncPolicyService.ReportTaskStatus)
+
 	if server.config.JobServer != nil && server.config.JobServer.Enabled {
 		jc := *server.config.JobServer
-		server.jobServer = jobserver.New(&jc, syncPolicyService)
+		server.jobServer = jobserver.New(&jc, syncPolicyService, syncJobService, logStore, canc)
 	}
 
 	server.services = &Services{
@@ -433,7 +452,7 @@ func (server *APIServer) initHandlersServicesRepos() {
 		handler.NewUserHandler(repos.User, authzService),
 		handler.NewDatasetHandler(datasetService),
 		handler.NewModelHandler(modelService, authzService),
-		handler.NewSyncPolicyHandler(syncPolicyService, syncJobService, repos.Registry),
+		handler.NewSyncPolicyHandler(syncPolicyService, syncJobService, repos.Registry, logStore, canc),
 		handler.NewRoleHandler(),
 		handler.NewRobotHandler(repos.Robot, repos.Project),
 	}
